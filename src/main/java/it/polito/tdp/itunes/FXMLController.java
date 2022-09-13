@@ -5,8 +5,10 @@
 package it.polito.tdp.itunes;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import it.polito.tdp.itunes.model.Album;
+import it.polito.tdp.itunes.model.AlbumBilancio;
 import it.polito.tdp.itunes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnPercorso; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA1"
-    private ComboBox<?> cmbA1; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA1; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA2"
-    private ComboBox<?> cmbA2; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA2; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtN"
     private TextField txtN; // Value injected by FXMLLoader
@@ -51,16 +53,61 @@ public class FXMLController {
 
     @FXML
     void doCalcolaAdiacenze(ActionEvent event) {
+    	txtResult.clear();
+    	if(!model.esisteGrafo()) {
+    		txtResult.clear();
+    		txtResult.appendText("CREA PRIMA GRAFO\n");
+    		return;
+    	}
+    	if(cmbA1.getValue()==null) {
+    		txtResult.clear();
+    		txtResult.appendText("SCEGLI PRIMA ALBUM\n");
+    		return;
+    	}
+    	for(AlbumBilancio v:model.getBilancio(cmbA1.getValue())) {
+    		txtResult.appendText(v+"\n");
+    	}
     	
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
+    	txtResult.clear();
+    	Album b1=this.cmbA1.getValue();
+    	Album b2= this.cmbA2.getValue();
+    	double x; 
+    	try {
+    		if(b1!= null && b2!=null) {
+    			x= Double.parseDouble(this.txtX.getText());
+    			if(model.sonoConnessi(b1, b2)) {
+    			for (Album a: model.calcolaPercorso(b1, b2, x)) {
+    				txtResult.appendText(a+"\n");
+    			}
+    		}
+    			else
+    				txtResult.appendText("VERTICI NON CONNESSI");
+    		}
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("Seleziona x");
+    	}
     	
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	txtResult.clear();
+    	Integer n;
+    	try {
+    		n= Integer.parseInt(this.txtN.getText());
+    		txtResult.appendText(model.creaaGrafo(n));
+    		this.cmbA1.getItems().addAll(model.getVertici());
+    		this.cmbA2.getItems().addAll(model.getVertici());
+    		
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("Inserire n");
+    	}
+    	
     	
     }
 
